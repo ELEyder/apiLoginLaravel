@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-firestore.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCK3GUiYMhF59TL8ui4lOXjsWsKlIDAsHs",
+        authDomain: "cinestar-f955f.firebaseapp.com",
+        projectId: "cinestar-f955f",
+        storageBucket: "cinestar-f955f.appspot.com",
+        messagingSenderId: "616167849382",
+        appId: "1:616167849382:web:37b25a3492ff5fb9162367"
+    };
+
+    const app = initializeApp(firebaseConfig)
+    const db = getFirestore(app)
+
+    const setPeliculas = async () => {
+        const data = await fetch("https://oaemdl.es/cinestar_sweb_php/peliculas/cartelera")
+        const cartelera = await data.json()
+        
+        cartelera.forEach(pelicula => {
+            addDoc(collection(db, 'cartelera'), pelicula)
+        });
+    }
+    const setPeliculas2 = async () => {
+        const data = await fetch("https://oaemdl.es/cinestar_sweb_php/peliculas/estrenos")
+        const estrenos = await data.json()
+        
+        estrenos.forEach(pelicula => {
+            addDoc(collection(db, 'estrenos'), pelicula)
+        });
+    }
+
+    const setCines = async () => {
+        const data = await fetch("https://oaemdl.es/cinestar_sweb_php/cines")
+        const cines = await data.json()
+        
+        cines.forEach(async cine => {
+            const dataTarifas = await fetch(`https://oaemdl.es/cinestar_sweb_php/cines/${cine.id}/tarifas`)
+            cine.tarifas = await dataTarifas.json()
+
+            const dataPeliculas = await fetch(`https://oaemdl.es/cinestar_sweb_php/cines/${cine.id}/peliculas`)
+            cine.peliculas = await dataPeliculas.json()
+
+            await addDoc(collection(db, 'cines'), cine)
+        });
+    }
+
+    setPeliculas()
+    setPeliculas2()
+</script>
+
+</html>
